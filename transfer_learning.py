@@ -15,6 +15,11 @@ from sklearn.metrics import classification_report
 from sklearn.decomposition import PCA
 import seaborn as sns
 import pandas as pd
+import random
+
+random.seed(0)
+torch.manual_seed(0)
+np.random.seed(0)
 
 IMAGE_SIZE = 64
 BATCH_SIZE = 16
