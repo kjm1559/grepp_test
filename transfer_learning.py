@@ -188,7 +188,7 @@ def test(model, dataloader, epoch=-1):
         print(f'eval acc: {torch.mean(torch.Tensor(acc)):>4}')
     return torch.mean(torch.Tensor(acc))
 
-def onnx_test(path, dataloader):
+def onnx_test(path, dataloader, verbose=True):
     """
     This function is for testing quantized onnx model.
     
@@ -201,16 +201,17 @@ def onnx_test(path, dataloader):
     """
     session = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
     input_name = session.get_inputs()[0].name
-    acc = []
-    y_pred_data = []
-    y_data = []
-    for X, y in dataloader:
-        y_pred = session.run(None, {input_name: X.numpy()})
-        acc.append(y[np.argmax(y_pred, axis=-1)[0] == y.numpy()].shape[0]/y.shape[0])
-        y_pred_data += np.argmax(y_pred, axis=-1)[0].tolist()
-        y_data += y.numpy().tolist()
-    print(classification_report(np.stack(y_data), np.stack(y_pred_data)))
-    return np.mean(acc)
+    if verbose:
+        acc = []
+        y_pred_data = []
+        y_data = []
+        for X, y in dataloader:
+            y_pred = session.run(None, {input_name: X.numpy()})
+            acc.append(y[np.argmax(y_pred, axis=-1)[0] == y.numpy()].shape[0]/y.shape[0])
+            y_pred_data += np.argmax(y_pred, axis=-1)[0].tolist()
+            y_data += y.numpy().tolist()
+        print(classification_report(np.stack(y_data), np.stack(y_pred_data)))
+        return np.mean(acc)
         
 
 def train(model, dataloader, epoch, loss_f, optimizer, test_dataloader=None):
